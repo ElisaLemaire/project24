@@ -3,7 +3,6 @@ from pubchemprops.pubchemprops import get_cid_by_name, get_first_layer_props, ge
 import urllib.error
 import urllib.parse
 from pka_lookup import pka_lookup_pubchem
-import pubchempy as pcp
 import re
 import json
 
