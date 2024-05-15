@@ -6,14 +6,20 @@ from pka_lookup import pka_lookup_pubchem
 import re
 import json
 
+mixture = []
+df = pd.DataFrame()
+user_df = pd.DataFrame(mixture, columns=['Mixture', 'Boiling_temp_(°C)', 'pKa', 'Molecular_mass', 'XLogP'])
+
+
 #Finds the pKa using the code of Khoi Van.
 def find_pka(inchikey_string):
     text_pka = pka_lookup_pubchem(inchikey_string, "inchikey")
     if text_pka is not None and 'pKa' in text_pka:
-        pKa_value = text_pka['pKa']
+        pKa_value = float(text_pka['pKa'])
         return pKa_value
     else:
         return None
+
 
 def find_boiling_point(name):
     text_dict = get_second_layer_props(str(name), ['Boiling Point', 'Vapor Pressure'])
@@ -52,10 +58,8 @@ The code takes time as find_pka(inchikey_string) and find_boiling_point(name) re
 The boiling point is a mean of all the values (references) found.
 """
 
-def get_df_properties():
-    compound_name = input("Enter the name of the compound like this: water, ethanol, methanol =")
-    compound_list = [compound.strip() for compound in compound_name.split(',')]
-    
+def get_df_properties(mixture):
+    compound_list = mixture
     compound_properties = []
     valid_properties = []
     for compound_name in compound_list:
