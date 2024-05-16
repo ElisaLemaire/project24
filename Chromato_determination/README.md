@@ -1,17 +1,19 @@
-![Project Logo](assets/banner.png)
-
-![Coverage Status](assets/coverage-badge.svg)
-
-<h1 align="center">
 Chrfinder
-</h1>
 
 <br>
 
+## Project overview
 
-The package find the best chromatography based on properties of the mixture
+This project automates the selection of the most suitable chromatography technique for analyzing a given mixture of organic compounds. By simply providing the names of the molecules in the mixture, the code retrieves their physicochemical properties from various web sources and determines the optimal chromatography method based on these properties.
 
-## 🔥 Usage
+## Benefits
+
+- **Efficiency**: Automates the property retrieval and decision-making process, saving time and reducing manual effort.
+- **Accuracy**: Utilizes precise physicochemical data to ensure the most suitable chromatography technique is chosen.
+- **Versatility**: Supports a wide range of organic compounds and chromatography methods.
+
+
+## 🔥 Getting Started
 
 ```python
 from mypackage import main_func
@@ -20,7 +22,7 @@ from mypackage import main_func
 result = main_func(data)
 ```
 
-This usage example shows how to quickly leverage the package's main functionality with just one line of code (or a few lines of code). 
+This usage example shows how to quickly leverage the package's main functionality with just one line of code (or a few lines of code).
 After importing the `main_func` (to be renamed by you), you simply pass in your `data` and get the `result` (this is just an example, your package might have other inputs and outputs). 
 Short and sweet, but the real power lies in the detailed documentation.
 
@@ -75,5 +77,6 @@ To install the package, run
 (conda_env) $ tox
 ```
 
-
+## Contributing
+Contributions are welcome! Please submit a pull request or open an issue to discuss any changes.
 
