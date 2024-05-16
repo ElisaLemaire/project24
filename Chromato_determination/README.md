@@ -13,7 +13,7 @@ This project automates the selection of the most suitable chromatography techniq
 - **Versatility**: Supports a wide range of organic compounds and chromatography methods.
 
 
-## 🔥 Getting Started
+## 🚀 Getting Started
 
 ```python
 from mypackage import main_func
@@ -26,7 +26,7 @@ This usage example shows how to quickly leverage the package's main functionalit
 After importing the `main_func` (to be renamed by you), you simply pass in your `data` and get the `result` (this is just an example, your package might have other inputs and outputs). 
 Short and sweet, but the real power lies in the detailed documentation.
 
-## 👩‍💻 Installation
+## ⚙ Installation
 
 Create a new environment, you may also give the environment a different name. 
 
