@@ -1,3 +1,3 @@
 # Notebooks
 
-Folder to place your `.pynb` notebooks.
+Folder containing all `.pynb` notebooks used to create the project.
