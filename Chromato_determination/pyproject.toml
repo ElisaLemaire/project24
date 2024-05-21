@@ -29,7 +29,7 @@ classifiers = [
 dynamic = ["version"]
 
 [project.urls]
-source = "https://github.com/dsantos03/Chrfinder"
+source = "https://github.com/dsanto03/Chrfinder"
 tracker = "https://github.com/dsantos03/Chrfinder/issues"
 
 [project.optional-dependencies]
