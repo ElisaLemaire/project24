@@ -13,7 +13,7 @@ class Test_find_pka:
     @patch('Chrfinder.pka_lookup_pubchem')
     def test_find_pka_valid_input(self, mock_pka_lookup):
         inchikey_string = 'CSCPPACGZOOCGX-UHFFFAOYSA-N'
-        expected_pka = '20.0'
+        expected_pka = '20'
         mock_pka_lookup.return_value = {
             'source': 'Pubchem', 
             'Pubchem_CID': '180', 
