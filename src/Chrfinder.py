@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 import pandas as pd
-from pubchemprops.pubchemprops import get_cid_by_name, get_first_layer_props, get_second_layer_props
+from pubchemprops import get_cid_by_name, get_first_layer_props, get_second_layer_props
 import urllib.error
 import urllib.parse
 from pka_lookup import pka_lookup_pubchem
@@ -43,25 +43,28 @@ def find_boiling_point(name):
     pattern_celsius = r'([-+]?\d*\.\d+|\d+) °C'
     pattern_F = r'([-+]?\d*\.\d+|\d+) °F'
     
-    for item in text_dict['Boiling Point']:
-        if 'Value' in item and 'StringWithMarkup' in item['Value']:
-            string_value = item['Value']['StringWithMarkup'][0]['String']
-
-            #Search for Celsius values, if found: adds to the list Boiling_point_values
-            match_celsius = re.search(pattern_celsius, string_value)
-            if match_celsius:
-                celsius = float(match_celsius.group(1))
-                Boiling_point_values.append(celsius)
-
-            #Search for Farenheit values, if found: converts farenheit to celsius before adding to the list Boiling_point_values
-            match_F = re.search(pattern_F, string_value)
-            if match_F:
-                fahrenheit_temp = float(match_F.group(1))
-                celsius_from_F = round(((fahrenheit_temp - 32) * (5/9)), 2)
-                Boiling_point_values.append(celsius_from_F)
-                
-    if Boiling_point_values:
-        Boiling_temp = round((sum(Boiling_point_values) / len(Boiling_point_values)), 2)
+    if 'Boiling Point' in text_dict:
+        for item in text_dict['Boiling Point']:
+            if 'Value' in item and 'StringWithMarkup' in item['Value']:
+                string_value = item['Value']['StringWithMarkup'][0]['String']
+    
+                #Search for Celsius values, if found: adds to the list Boiling_point_values
+                match_celsius = re.search(pattern_celsius, string_value)
+                if match_celsius:
+                    celsius = float(match_celsius.group(1))
+                    Boiling_point_values.append(celsius)
+    
+                #Search for Farenheit values, if found: converts farenheit to celsius before adding to the list Boiling_point_values
+                match_F = re.search(pattern_F, string_value)
+                if match_F:
+                    fahrenheit_temp = float(match_F.group(1))
+                    celsius_from_F = round(((fahrenheit_temp - 32) * (5/9)), 2)
+                    Boiling_point_values.append(celsius_from_F)
+                    
+        if Boiling_point_values:
+            Boiling_temp = round((sum(Boiling_point_values) / len(Boiling_point_values)), 2)
+        else:
+            Boiling_temp = None
     else:
         Boiling_temp = None
     return Boiling_temp
@@ -122,47 +125,61 @@ def get_df_properties(mixture):
     # Set the property names from the first dictionary as column headers
     if len(valid_properties) > 0:
         df = df.reindex(columns=valid_properties[0].keys())
+    print(df)
     return(df)
 
 def det_chromato(df):
     global Type_Label, Eluant_Label, pH_Label
     if df.empty:
         return "Unknown", "Unknown", None
-        
-    max_logP = df['XLogP'].max()
-    min_logP = df['XLogP'].min()
     
-    if df['Boiling Point'].min() >= 300:
+    # Filter out NaN values from the boiling points list
+    boiling_temps = [temp for temp in df['Boiling Point'] if temp is not None and not pd.isna(temp)]
+    
+    # Check if there are valid boiling points and if the maximum is <= 300
+    if boiling_temps and pd.Series(boiling_temps).max() <= 300:
         Chromato_type = 'GC'
         eluent_nature = 'gas'
         proposed_pH = None
     else:
-        max_molar_mass = df['MolecularWeight'].max()
-        min_pKa = float('inf')  # Initialize min_pKa with a large value
-        max_pKa = float('-inf')  # Initialize max_pKa with a small value
+        molar_masses = [mass for mass in df['MolecularWeight'] if mass is not None and not pd.isna(mass)]
+        max_molar_mass = max(molar_masses) if molar_masses else None
+
+        min_pKa = float('inf')
+        max_pKa = float('-inf')
         for pKa_entry in df['pKa']:
             if isinstance(pKa_entry, list):
                 for pKa_value in pKa_entry:
-                    min_pKa = min(pKa_value, min_pKa)
-                    max_pKa = max(pKa_value, max_pKa)
+                    if pKa_value is not None and not pd.isna(pKa_value):
+                        min_pKa = min(pKa_value, min_pKa)
+                        max_pKa = max(pKa_value, max_pKa)
             else:
-                min_pKa = min(pKa_entry, min_pKa)
-                max_pKa = max(pKa_entry, max_pKa)
+                if pKa_entry is not None and not pd.isna(pKa_entry):
+                    min_pKa = min(pKa_entry, min_pKa)
+                    max_pKa = max(pKa_entry, max_pKa)
         
-        if max_molar_mass <= 2000:
-            if max_logP < 0:
-                proposed_pH = max_pKa + 2
-                if 3 <= proposed_pH <= 11 and max_pKa + 2 >= proposed_pH:
+        if min_pKa == float('inf'):
+            min_pKa = None
+        if max_pKa == float('-inf'):
+            max_pKa = None
+
+        logPs = [XLogP for XLogP in df['XLogP'] if XLogP is not None and not pd.isna(XLogP)]
+        max_logP = max(logPs) if logPs else None
+        min_logP = min(logPs) if logPs else None
+
+        if max_molar_mass is not None and max_molar_mass <= 2000:
+            if max_logP is not None and max_logP < 0:
+                proposed_pH = max_pKa + 2 if max_pKa is not None else None
+                if proposed_pH is not None and 3 <= proposed_pH <= 11:
                     Chromato_type = 'IC'
                     eluent_nature = 'aqueous'
-                    proposed_pH = max_pKa + 2
                 else:
                     Chromato_type = 'HPLC'
                     eluent_nature = 'organic or hydro-organic'
-                    proposed_pH = min_pKa + 2
+                    proposed_pH = min_pKa + 2 if min_pKa is not None else None
             else:
                 Chromato_type = 'HPLC'
-                if -2 <= min_logP <= 0:
+                if min_logP is not None and -2 <= min_logP <= 0:
                     eluent_nature = 'organic or hydro-organic'
                     if min_logP >= 0:
                         Chromato_type += ' on normal stationary phase'
@@ -171,16 +188,20 @@ def det_chromato(df):
                 else:
                     eluent_nature = 'organic or hydro-organic'
                     Chromato_type += ' on normal stationary phase'
-                proposed_pH = min_pKa + 2
+                proposed_pH = min_pKa + 2 if min_pKa is not None else None
         else:
-            if max_logP < 0:
+            if max_logP is not None and max_logP < 0:
                 Chromato_type = 'HPLC on reverse stationary phase'
                 eluent_nature = 'organic or hydro-organic'
-                proposed_pH = min_pKa + 2
+                proposed_pH = min_pKa + 2 if min_pKa is not None else None
             else:
-                Chromato_type = 'SEC on gel filtration'
-                eluent_nature = 'aqueous'
-                proposed_pH = min_pKa + 2
+                if max_logP is not None and max_logP > 0:
+                    Chromato_type = 'SEC on gel permeation with a hydrophobe organic polymer stationary phase'
+                    eluent_nature = 'organic solvent'
+                else:
+                    Chromato_type = 'SEC on gel filtration with a polyhydroxylated hydrophile polymer stationary phase'
+                    eluent_nature = 'aqueous'
+                proposed_pH = min_pKa + 2 if min_pKa is not None else None
     
     return Chromato_type, eluent_nature, proposed_pH
 
