@@ -12,7 +12,7 @@ dependencies = [
     # "rdkit",
 ]
 authors = [
-    {name = "Diogo Santos Martins", email = "diogo.santosmartins@epfl.ch"}
+    {name = "Anthony Verhoeven", email = "anthony.verhoeven@epfl.ch"}
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -29,8 +29,8 @@ classifiers = [
 dynamic = ["version"]
 
 [project.urls]
-source = "https://github.com/dsanto03/Chrfinder"
-tracker = "https://github.com/dsantos03/Chrfinder/issues"
+source = "https://github.com/Averhv/Chrfinder"
+tracker = "https://github.com/Averhv/Chrfinder/issues"
 
 [project.optional-dependencies]
 test = [
@@ -48,7 +48,7 @@ doc = [
 ]
 
 [tool.hatch.version]
-path = "src/chrfinder/__init__.py"
+path = "src/__init__.py"
 
 [tool.pytest.ini_options]
 testpaths = [
@@ -64,3 +64,6 @@ omit = [
 exclude_also = [
     "if __name__ == .__main__.:",
 ]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/Chrfinder"]
