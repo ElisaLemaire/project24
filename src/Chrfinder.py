@@ -134,7 +134,7 @@ def det_chromato(df):
         return "Unknown", "Unknown", None
     
     # Filter out NaN values from the boiling points list
-    boiling_temps = [temp for temp in df['Boiling Point'] if temp is not None and not pd.isna(temp)]
+    boiling_temps = [temp for temp in df['Boiling Point'] if temp is not None and not pd.isna(temp)] 
     
     # Check if there are valid boiling points and if the maximum is <= 300
     if boiling_temps and pd.Series(boiling_temps).max() <= 300:

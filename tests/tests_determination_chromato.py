@@ -1,16 +1,18 @@
 import pandas as pd
 import pytest
-from src.chrfinder.chromatography import det_chromato
+import sys, os
+sys.path.append(os.path.realpath('src'))
+from src.Chrfinder import det_chromato
 
 @pytest.mark.parametrize("description, input_data, expected_output", [
     (
         'Basic Functionality Test',
         {
             'Mixture': ['Caf', 'Ace', 'Asp'],
-            'Boiling_temp_(°C)': [178, 332.7, 246],
-            'logP': [-0.07, -1.33, 0.07],
+            'Boiling Point': [178, 332.7, 246],
+            'XlogP': [-0.07, -1.33, 0.07],
             'pKa': [[14], [3.02], [1.08, 9.13]],
-            'Molecular_mass': [194, 204, 133],
+            'MolecularWeight': [194, 204, 133],
         },
         ('HPLC', 'organic or hydro-organic', 3.08)
     ),
@@ -18,10 +20,10 @@ from src.chrfinder.chromatography import det_chromato
         'High Boiling Point Test',
         {
             'Mixture': ['X'],
-            'Boiling_temp_(°C)': [310],
-            'logP': [0],
+            'Boiling Point': [310],
+            'XlogP': [0],
             'pKa': [[5]],
-            'Molecular_mass': [150],
+            'MolecularWeight': [150],
         },
         ('GC', 'gas', None)
     ),
@@ -29,10 +31,10 @@ from src.chrfinder.chromatography import det_chromato
         'Low Molecular Mass Test',
         {
             'Mixture': ['Y'],
-            'Boiling_temp_(°C)': [100],
-            'logP': [-0.5],
+            'Boiling Point': [100],
+            'XlogP': [-0.5],
             'pKa': [[3]],
-            'Molecular_mass': [150],
+            'MolecularWeight': [150],
         },
         ('IC', 'aqueous', 5)
     ),
@@ -40,10 +42,10 @@ from src.chrfinder.chromatography import det_chromato
         'Mixed pKa Values Test',
         {
             'Mixture': ['Z'],
-            'Boiling_temp_(°C)': [200],
-            'logP': [0],
+            'Boiling Point': [200],
+            'XlogP': [0],
             'pKa': [[2, 6]],
-            'Molecular_mass': [180],
+            'MolecularWeight': [180],
         },
         ('HPLC', 'organic or hydro-organic', 4)
     ),
@@ -51,10 +53,10 @@ from src.chrfinder.chromatography import det_chromato
         'Edge Cases for pKa and logP',
         {
             'Mixture': ['W'],
-            'Boiling_temp_(°C)': [250],
-            'logP': [-2],
+            'Boiling Point': [250],
+            'XlogP': [-2],
             'pKa': [[3, 11]],
-            'Molecular_mass': [160],
+            'MolecularWeight': [160],
         },
         ('HPLC on reverse stationary phase using C18 column', 'organic or hydro-organic', 5)
     ),
@@ -67,10 +69,10 @@ from src.chrfinder.chromatography import det_chromato
         'None Values in DataFrame',
         {
             'Mixture': ['V'],
-            'Boiling_temp_(°C)': [None],
-            'logP': [None],
+            'Boiling Point': [None],
+            'XlogP': [None],
             'pKa': [[None]],
-            'Molecular_mass': [None],
+            'MolecularWeight': [None],
         },
         (None, None, None)
     ),
@@ -78,10 +80,10 @@ from src.chrfinder.chromatography import det_chromato
         'High Molecular Mass Test',
         {
             'Mixture': ['U'],
-            'Boiling_temp_(°C)': [150],
-            'logP': [1],
+            'Boiling Point': [150],
+            'XlogP': [1],
             'pKa': [[5]],
-            'Molecular_mass': [2500],
+            'MolecularWeight': [2500],
         },
         ('SEC on gel permeation with a hydrophobe organic polymer stationary phase', 'organic solvent', 7)
     ),
