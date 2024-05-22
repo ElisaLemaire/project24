@@ -1,0 +1,232 @@
+import tkinter as tk
+from tkinter import ttk
+from tkinter import messagebox
+import pandas as pd
+from pubchemprops.pubchemprops import get_cid_by_name, get_first_layer_props, get_second_layer_props
+import urllib.error
+import urllib.parse
+from pka_lookup import pka_lookup_pubchem
+import re
+import json
+
+"""
+This code takes as input a list of compound written like: acetone, water. The code allows spaces, wrong names and unknown pubchem names.
+Then it iterates through each of them to find if they exist on pubchem, and if they do,
+then 'CID', 'MolecularFormula', 'MolecularWeight', 'InChIKey', 'IUPACName', 'XLogP', 'pKa',  and 'BoilingPoint' is added into a list and then a data frame.
+The code takes time as find_pka(inchikey_string) and find_boiling_point(name) request URL to find the string on the Pubchem page, then extract it using regex. 
+The Boiling Point is a mean of all the values (references) found.
+"""
+
+mixture=[]
+
+def add_molecule(mixture_entry, mixture_listbox):
+    element = mixture_entry.get()
+    mixture.append(element)
+    mixture_listbox.insert(tk.END, element.strip())
+
+def add_entry_widget(root):
+    entry_widget.grid(row=3, column=1, padx=5, pady=5)
+    label.grid(row=3, column=0, padx=5, pady=5)
+    
+#Finds the pKa using the code of Khoi Van.
+def find_pka(inchikey_string):
+    text_pka = pka_lookup_pubchem(inchikey_string, "inchikey")
+    if text_pka is not None and 'pKa' in text_pka:
+            pKa_value = text_pka['pKa']
+            return pKa_value
+    else:
+        return None
+
+def find_boiling_point(name):
+    text_dict = get_second_layer_props(str(name), ['Boiling Point', 'Vapor Pressure'])
+    Boiling_point_values = []
+    pattern_celsius = r'([-+]?\d*\.\d+|\d+) °C'
+    pattern_F = r'([-+]?\d*\.\d+|\d+) °F'
+    
+    for item in text_dict['Boiling Point']:
+        if 'Value' in item and 'StringWithMarkup' in item['Value']:
+            string_value = item['Value']['StringWithMarkup'][0]['String']
+
+            #Search for Celsius values, if found: adds to the list Boiling_point_values
+            match_celsius = re.search(pattern_celsius, string_value)
+            if match_celsius:
+                celsius = float(match_celsius.group(1))
+                Boiling_point_values.append(celsius)
+
+            #Search for Farenheit values, if found: converts farenheit to celsius before adding to the list Boiling_point_values
+            match_F = re.search(pattern_F, string_value)
+            if match_F:
+                fahrenheit_temp = float(match_F.group(1))
+                celsius_from_F = round(((fahrenheit_temp - 32) * (5/9)), 2)
+                Boiling_point_values.append(celsius_from_F)
+                
+    if Boiling_point_values:
+        Boiling_temp = round((sum(Boiling_point_values) / len(Boiling_point_values)), 2)
+    else:
+        Boiling_temp = None
+    return Boiling_temp
+
+def get_df_properties(mixture):
+    compound_list = mixture
+    compound_properties = []  # Define compound_properties here
+    valid_properties = []
+    for compound_name in compound_list:
+        compound_name_encoded = urllib.parse.quote(compound_name.strip())
+        try: 
+            first_data = get_first_layer_props(compound_name_encoded, ['MolecularFormula', 'MolecularWeight', 'InChIKey', 'IUPACName', 'XLogP'])
+            compound_info = {}
+            for prop in ['CID', 'MolecularFormula', 'MolecularWeight', 'InChIKey', 'IUPACName', 'XLogP']:
+                if prop == 'MolecularWeight':
+                    MolecularWeight_string = first_data.get(prop)
+                    if MolecularWeight_string is not None:
+                        MolecularWeight_float = float(MolecularWeight_string)
+                        compound_info[prop] = MolecularWeight_float
+                    else:
+                        compound_info[prop] = None
+                else:
+                    compound_info[prop] = first_data.get(prop)
+            
+            #adds pKa if float, else converts to float from string by extracting the float contained (wrongly written on pubchem).
+            pka_value = find_pka(first_data['InChIKey'])
+            pka_float = None
+            if pka_value is not None:
+                if isinstance(pka_value, float):
+                    pka_float = pka_value
+                else:
+                    try:
+                        pka_float = float(pka_value)
+                    except (ValueError, TypeError):
+                        match = re.search(r'\d+\.\d+', str(pka_value))
+                        if match:
+                            pka_float = float(match.group())
+            if pka_float is not None:
+                compound_info['pKa'] = pka_float
+            else:
+                # Handle the case where pka_float is None
+                compound_info['pKa'] = None
+                            
+            #adds Boiling point
+            compound_info['Boiling Point'] = find_boiling_point(compound_name_encoded)
+            compound_properties.append(compound_info)
+        
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                print(f'{compound_name} not found on PubChem')
+            else:
+                print(f'An error occurred: {e}')
+
+    for prop in compound_properties:
+        if isinstance(prop, dict):
+            valid_properties.append(prop)
+    df = pd.DataFrame(valid_properties)
+    # Set the property names from the first dictionary as column headers
+    if len(valid_properties) > 0:
+        df = df.reindex(columns=valid_properties[0].keys())
+    return(df)
+
+def det_chromato(df):
+    global Type_Label, Eluant_Label, pH_Label
+    if df.empty:
+        return "Unknown", "Unknown", None
+        
+    max_logP = df['XLogP'].max()
+    min_logP = df['XLogP'].min()
+    
+    if df['Boiling Point'].min() >= 300:
+        Chromato_type = 'GC'
+        eluent_nature = 'gas'
+        proposed_pH = None
+    else:
+        max_molar_mass = df['MolecularWeight'].max()
+        min_pKa = float('inf')  # Initialize min_pKa with a large value
+        max_pKa = float('-inf')  # Initialize max_pKa with a small value
+        for pKa_entry in df['pKa']:
+            if isinstance(pKa_entry, list):
+                for pKa_value in pKa_entry:
+                    min_pKa = min(pKa_value, min_pKa)
+                    max_pKa = max(pKa_value, max_pKa)
+            else:
+                min_pKa = min(pKa_entry, min_pKa)
+                max_pKa = max(pKa_entry, max_pKa)
+        
+        if max_molar_mass <= 2000:
+            if max_logP < 0:
+                proposed_pH = max_pKa + 2
+                if 3 <= proposed_pH <= 11 and max_pKa + 2 >= proposed_pH:
+                    Chromato_type = 'IC'
+                    eluent_nature = 'aqueous'
+                    proposed_pH = max_pKa + 2
+                else:
+                    Chromato_type = 'HPLC'
+                    eluent_nature = 'organic or hydro-organic'
+                    proposed_pH = min_pKa + 2
+            else:
+                Chromato_type = 'HPLC'
+                if -2 <= min_logP <= 0:
+                    eluent_nature = 'organic or hydro-organic'
+                    if min_logP >= 0:
+                        Chromato_type += ' on normal stationary phase'
+                    else:
+                        Chromato_type += ' on reverse stationary phase using C18 column'
+                else:
+                    eluent_nature = 'organic or hydro-organic'
+                    Chromato_type += ' on normal stationary phase'
+                proposed_pH = min_pKa + 2
+        else:
+            if max_logP < 0:
+                Chromato_type = 'HPLC on reverse stationary phase'
+                eluent_nature = 'organic or hydro-organic'
+                proposed_pH = min_pKa + 2
+            else:
+                Chromato_type = 'SEC on gel filtration'
+                eluent_nature = 'aqueous'
+                proposed_pH = min_pKa + 2
+    
+    return Chromato_type, eluent_nature, proposed_pH
+
+def update_results(root, mixture):
+    global Type_Label, Eluant_Label, pH_Label
+    if not mixture:
+        messagebox.showinfo("Error", "Please add molecules to the mixture before determining chromatography.")
+        return
+    
+    df = get_df_properties(mixture)
+    Chromato_type, eluent_nature, proposed_pH = det_chromato(df)
+    
+    Type_Label.config(text=f"The advisable chromatography type is: {Chromato_type}")
+    Eluant_Label.config(text=f"Eluent nature: {eluent_nature}")
+    if proposed_pH is not None:
+        pH_Label.config(text=f"Proposed pH for the eluent: {proposed_pH}")
+
+def main():
+    global entry_widget, label, mixture_listbox, Type_Label, Eluant_Label, pH_Label
+    root = tk.Tk()
+    root.title("Determination of Chromatography Type")
+    """
+    get_df_properties(mixture_test)
+    Mixture_chromato_type, eluent_nature, proposed_pH = det_chromato(df)
+    """
+    entry_widget = tk.Entry(root)
+    label = tk.Label(root, text="pH value:")
+    mixture_entry = ttk.Entry(root)
+    mixture_label = ttk.Label(root, text="Names of the molecules in the mixture:")
+    add_button = ttk.Button(root, text="Add molecule", command=lambda: add_molecule(mixture_entry, mixture_listbox))
+    mixture_listbox = tk.Listbox(root)
+    calculate_button = ttk.Button(root, text="Determine chromatography", command=lambda: update_results(root, mixture))
+    Type_Label = ttk.Label(root, text="")
+    Eluant_Label = ttk.Label(root, text="")
+    pH_Label = ttk.Label(root, text="")
+    
+    mixture_label.grid(row=0, column=0, padx=5, pady=5)
+    mixture_entry.grid(row=0, column=1, padx=5, pady=5)
+    add_button.grid(row=1, column=0, columnspan=2, padx=5, pady=5)
+    mixture_listbox.grid(row=2, column=0, columnspan=2, padx=5, pady=5)
+    calculate_button.grid(row=3, column=0, columnspan=2, padx=5, pady=5)
+    Type_Label.grid(row=4, column=0, columnspan=2, padx=5, pady=5)
+    Eluant_Label.grid(row=5, column=0, columnspan=2, padx=5, pady=5)
+    pH_Label.grid(row=6, column=0, columnspan=2, padx=5, pady=5)
+    
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
