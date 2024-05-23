@@ -1,47 +1,94 @@
-# Chromatography Technique Selector
+<p align="center">
+  <img src="Chrfinder/assets/Image_Chrfinder.webp" alt="Project Logo" width="650"/>
+</p>
 
-## Project Overview
+# Chrfinder
 
-This project automates the selection of the most suitable chromatography technique for analyzing a given mixture of organic compounds. By simply providing the names of the molecules in the mixture, the code retrieves their physicochemical properties from various web sources and determines the optimal chromatography method based on these properties.
+## Project overview
 
-## How It Works
+Welcome to **Chrfinder**! This project automates the selection of the most suitable chromatography technique for separating and analyzing a given mixture of organic compounds. By simply providing the names of the molecules in the mixture, the code retrieves their physicochemical properties from PubChem web source and determines the optimal chromatography method based on these properties.
 
-1. **Input**: 
-   - User provides the names of the molecules present in the mixture.
+## ✅ Benefits
 
-2. **Data Retrieval**:
-   - The code searches online databases and web pages to gather key physicochemical properties for each molecule:
-     - **Boiling temperature (°C)**
-     - **logP (partition coefficient)**
-     - **pKa (acid dissociation constants)**
-     - **Molecular mass**
+- **🚀 Efficiency**: Automates the property retrieval and decision-making process, saving time and reducing manual effort.
+- **🎯 Accuracy**: Utilizes precise physicochemical data to ensure the most suitable chromatography technique is chosen.
+- **🌐 Versatility**: Supports a wide range of organic compounds and chromatography methods.
 
-3. **Chromatography Type Decision**:
-   - **Gas Chromatography (GC)**:
-     - Chosen if the minimum boiling temperature of the compounds is 300°C or higher.
-   - **Ion Chromatography (IC)**:
-     - Selected if the maximum molecular mass is less than or equal to 2000, and the maximum logP is negative, with a proposed pH derived from the pKa values.
-   - **High-Performance Liquid Chromatography (HPLC)**:
-     - Applied under various conditions depending on logP values and pKa ranges, with different stationary phases and eluent natures suggested based on the specific properties.
-   - **Size Exclusion Chromatography (SEC)**:
-     - Used for compounds with a molecular mass greater than 2000. The eluent nature and exact method depend on the logP values:
-       - For positive logP values, SEC on gel permeation with an organic solvent is selected.
-       - Otherwise, SEC on gel filtration with a polyhydroxylated hydrophile polymer in an aqueous solvent is recommended.
-
-4. **Output**:
-   - The code outputs the advisable chromatography type, the nature of the eluent (gas, aqueous, or organic), and the proposed pH for the eluent if applicable.
-
-## Benefits
-
-- **Efficiency**: Automates the property retrieval and decision-making process, saving time and reducing manual effort.
-- **Accuracy**: Utilizes precise physicochemical data to ensure the most suitable chromatography technique is chosen.
-- **Versatility**: Supports a wide range of organic compounds and chromatography methods.
-
-## Getting Started
-
-
-## Contributing
+## 🫱🏽‍🫲🏼 Contributing
 Contributions are welcome! Please submit a pull request or open an issue to discuss any changes.
 
 
+## 🚀 Getting Started
+
+```python
+from mypackage import main_func
+
+# One line to rule them all
+result = main_func(data)
+```
+
+This usage example shows how to quickly leverage the package's main functionality with just one line of code (or a few lines of code).
+After importing the `main_func` (to be renamed by you), you simply pass in your `data` and get the `result` (this is just an example, your package might have other inputs and outputs). 
+Short and sweet, but the real power lies in the detailed documentation.
+
+## ⚙ Installation
+
+Create a new environment, you may also give the environment a different name. 
+
+```
+conda create -n chrfinder python=3.10 
+```
+
+```
+conda activate chrfinder
+(conda_env) $ pip install .
+```
+
+If you need jupyter lab, install it 
+
+```
+(chrfinder) $ pip install jupyterlab
+```
+
+
+## 🛠️ Development installation
+
+Initialize Git (only for the first time). 
+
+Note: You should have create an empty repository on `https://github.com:dsantos03/Chrfinder`.
+
+```
+git init
+git add * 
+git add .*
+git commit -m "Initial commit" 
+git branch -M main
+git remote add origin git@github.com:dsantos03/Chrfinder.git 
+git push -u origin main
+```
+
+Then add and commit changes as usual. 
+
+To install the package, run
+
+```
+(chrfinder) $ pip install -e ".[test,doc]"
+```
+
+### Run tests and coverage
+
+```
+(conda_env) $ pip install tox
+(conda_env) $ tox
+```
+
+## Work in progress...
+- Build a data molecules thermostability database;
+- taking into account multiple pKa values for polyacids for exemple;
+- optimize the research: search only one time te same name;
+- find physicalchemical properties as addition functionality;
+
+
+## 🫱🏽‍🫲🏼 Contributing
+Contributions are welcome! Please submit a pull request or open an issue to discuss any changes.
 
