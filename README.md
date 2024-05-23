@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="Chrfinder/assets/Image_Chrfinder.webp" alt="Project Logo" width="650"/>
+  <img src="assets/Image_Chrfinder.webp" alt="Project Logo" width="650"/>
 </p>
 
 # Chrfinder
@@ -12,11 +12,7 @@ Welcome to **Chrfinder**! This project automates the selection of the most suita
 
 - **🚀 Efficiency**: Automates the property retrieval and decision-making process, saving time and reducing manual effort.
 - **🎯 Accuracy**: Utilizes precise physicochemical data to ensure the most suitable chromatography technique is chosen.
-- **🌐 Versatility**: Supports a wide range of organic compounds and chromatography methods.
-
-## 🫱🏽‍🫲🏼 Contributing
-Contributions are welcome! Please submit a pull request or open an issue to discuss any changes.
-
+- **🌐 Versatility**: Supports a wide range of organic compounds and chromatography methods (PubChem database).
 
 ## 🚀 Getting Started
 
@@ -41,15 +37,34 @@ conda create -n chrfinder python=3.10
 
 ```
 conda activate chrfinder
-(conda_env) $ pip install .
+pip install .
 ```
 
 If you need jupyter lab, install it 
 
 ```
-(chrfinder) $ pip install jupyterlab
+pip install jupyterlab
 ```
 
+## How It Works
+
+1. **Input**: User provides the names of the molecules present in the mixture through a Tkinter interface.
+
+2. **Data Retrieval**: Finds the following key physicochemical properties for each molecule in Pubchem:
+     - **Boiling temperature (°C)**
+     - **logP (partition coefficient)**
+     - **pKa (acid dissociation constants)**
+     - **Molecular mass**
+
+3. **Chromatography Type Decision**: Follows logical conditions to determine best chromatography and conditions
+   - **Gas Chromatography (GC)**: if the Boiling Point is low (T<sub>eb</sub> <250°C).
+   - **Ion Chromatography (IC)**: for small molecules (M<2000g/mol) and a negative maximum LogP negative
+     - Selected if the maximum molecular mass is less than or equal to 2000, and the maximum logP is negative, with a proposed pH derived from the pKa values.
+   - **High-Performance Liquid Chromatography (HPLC)**: Chosen for different conditions. Stationary phases and eluent natures are suggested.
+   - **Size Exclusion Chromatography (SEC)**: For big molecules (M>2000g/mol). From LogP, it suggest gel permeation or gel filtration, with corresponding eluant.
+
+4. **Output**:
+   - The code outputs the advisable chromatography type, the nature of the eluent (gas, aqueous, or organic), and the proposed pH for the eluent if applicable through the Tkinter interface.
 
 ## 🛠️ Development installation
 
@@ -63,7 +78,7 @@ git add *
 git add .*
 git commit -m "Initial commit" 
 git branch -M main
-git remote add origin git@github.com:dsantos03/Chrfinder.git 
+git remote add origin git@github.com:Averhv/Chrfinder.git 
 git push -u origin main
 ```
 
@@ -72,14 +87,14 @@ Then add and commit changes as usual.
 To install the package, run
 
 ```
-(chrfinder) $ pip install -e ".[test,doc]"
+pip install -e ".[test,doc]"
 ```
 
-### Run tests and coverage
+### Run tests and get coverage
 
 ```
-(conda_env) $ pip install tox
-(conda_env) $ tox
+pip install tox
+tox
 ```
 
 ## Work in progress...
