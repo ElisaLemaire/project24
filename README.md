@@ -6,8 +6,8 @@
 
 ## <ins>Project overview</ins>
 
-.. image:: http://img.shields.io/pypi/l/PubChemPy.svg?style=flat
-    :target: https://github.com/mcs07/PubChemPy/blob/master/LICENSE
+[![PyPI version](http://img.shields.io/pypi/v/PubChemPy.svg?style=flat)](https://pypi.python.org/pypi/PubChemPy)
+
 
 Welcome to **Chrfinder**! This project **automates the selection of the most suitable chromatography** technique . By simply providing the **names** of the molecules in the mixture, the code retrieves their physicochemical properties from **PubChem** (web source) and determines the optimal chromatography method based on these properties. It also gives the optimal conditions.
 
