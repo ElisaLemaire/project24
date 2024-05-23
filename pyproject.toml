@@ -11,7 +11,7 @@ description = "The package find the best chromatography based on properties of t
 dependencies = [
     "pandas",
     "pubchempy",
-    # "rdkit",
+    "tk",
 ]
 authors = [
     {name = "Anthony Verhoeven", email = "anthony.verhoeven@epfl.ch"}
