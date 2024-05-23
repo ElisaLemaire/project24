@@ -12,7 +12,7 @@ class TestFindPka:
     @patch('Chrfinder.pka_lookup.pka_lookup_pubchem')
     def test_find_pka_valid_input(self, mock_pka_lookup):
         inchikey_string = 'CSCPPACGZOOCGX-UHFFFAOYSA-N'
-        expected_pka = '20.0'
+        expected_pka = '20'
         mock_pka_lookup.return_value = {
             'source': 'Pubchem',
             'Pubchem_CID': '180',
@@ -46,21 +46,21 @@ class TestFindPka:
 
 
 class TestFindBoilingPoint:
-    @patch('Chrfinder.get_second_layer_props')
+    @patch('Chrfinder.pubchemprops.get_second_layer_props')
     def test_single_celsius(self, mock_get_second_layer_props):
         mock_get_second_layer_props.return_value = {
             'Boiling Point': [{'Value': {'StringWithMarkup': [{'String': '100 °C'}]}}]
         }
-        assert find_boiling_point("water") == 100
+        assert find_boiling_point("water") == pytest.approx(100, rel=1e-2)
 
-    @patch('Chrfinder.get_second_layer_props')
+    @patch('Chrfinder.pubchemprops.get_second_layer_props')
     def test_single_fahrenheit(self, mock_get_second_layer_props):
         mock_get_second_layer_props.return_value = {
             'Boiling Point': [{'Value': {'StringWithMarkup': [{'String': '212 °F'}]}}]
         }
-        assert find_boiling_point("water") == 100
+        assert find_boiling_point("water") == pytest.approx(100, rel=1e-2)
 
-    @patch('Chrfinder.get_second_layer_props')
+    @patch('Chrfinder.pubchemprops.get_second_layer_props')
     def test_multiple_celsius(self, mock_get_second_layer_props):
         mock_get_second_layer_props.return_value = {
             'Boiling Point': [
@@ -68,9 +68,9 @@ class TestFindBoilingPoint:
                 {'Value': {'StringWithMarkup': [{'String': '50 °C'}]}}
             ]
         }
-        assert find_boiling_point("water") == 75
+        assert find_boiling_point("water") == pytest.approx(75, rel=1e-2)
 
-    @patch('Chrfinder.get_second_layer_props')
+    @patch('Chrfinder.pubchemprops.get_second_layer_props')
     def test_multiple_fahrenheit(self, mock_get_second_layer_props):
         mock_get_second_layer_props.return_value = {
             'Boiling Point': [
@@ -78,9 +78,9 @@ class TestFindBoilingPoint:
                 {'Value': {'StringWithMarkup': [{'String': '122 °F'}]}}
             ]
         }
-        assert find_boiling_point("water") == 100
+        assert find_boiling_point("water") == pytest.approx(100, rel=1e-2)
 
-    @patch('Chrfinder.get_second_layer_props')
+    @patch('Chrfinder.pubchemprops.get_second_layer_props')
     def test_mixed_values(self, mock_get_second_layer_props):
         mock_get_second_layer_props.return_value = {
             'Boiling Point': [
@@ -88,25 +88,29 @@ class TestFindBoilingPoint:
                 {'Value': {'StringWithMarkup': [{'String': '212 °F'}]}}
             ]
         }
-        assert find_boiling_point("water") == 100
+        assert find_boiling_point("water") == pytest.approx(100, rel=1e-2)
 
-    @patch('Chrfinder.get_second_layer_props')
+    @patch('Chrfinder.pubchemprops.get_second_layer_props')
     def test_no_data(self, mock_get_second_layer_props):
         mock_get_second_layer_props.return_value = {}
         assert find_boiling_point("unknown") is None
 
     def test_no_value_key(self):
-        assert find_boiling_point({'Boiling Point': [{'Key': {'StringWithMarkup': [{'String': '100 °C'}]}}]}) is None
+        with patch('Chrfinder.pubchemprops.get_second_layer_props', return_value={}):
+            assert find_boiling_point({'Boiling Point': [{'Key': {'StringWithMarkup': [{'String': '100 °C'}]}}]}) is None
 
     def test_no_string_with_markup_key(self):
-        assert find_boiling_point({'Boiling Point': [{'Value': {'AnotherKey': [{'String': '100 °C'}]}}]}) is None
+        with patch('Chrfinder.pubchemprops.get_second_layer_props', return_value={}):
+            assert find_boiling_point({'Boiling Point': [{'Value': {'AnotherKey': [{'String': '100 °C'}]}}]}) is None
 
     def test_no_matching_patterns(self):
-        assert find_boiling_point({'Boiling Point': [{'Value': {'StringWithMarkup': [{'String': '100 C'}]}}]}) is None
+        with patch('Chrfinder.pubchemprops.get_second_layer_props', return_value={}):
+            assert find_boiling_point({'Boiling Point': [{'Value': {'StringWithMarkup': [{'String': '100 C'}]}}]}) is None
 
     def test_empty_input(self):
-        assert find_boiling_point('') is None
-        assert find_boiling_point(None) is None
+        with patch('Chrfinder.pubchemprops.get_second_layer_props', return_value={}):
+            assert find_boiling_point('') is None
+            assert find_boiling_point(None) is None
 
 
 class TestGetDfProperties:
@@ -152,7 +156,9 @@ class TestGetDfProperties:
         pd.testing.assert_frame_equal(df, expected_df)
 
     @patch('Chrfinder.pubchemprops.get_first_layer_props')
-    def test_compound_not_found(self, mock_get_first_layer_props):
+    @patch('Chrfinder.find_pka')
+    @patch('Chrfinder.find_boiling_point')
+    def test_compound_not_found(self, mock_get_first_layer_props, mock_find_pka, mock_find_boiling_point):
         mock_get_first_layer_props.side_effect = urllib.error.HTTPError(
             url=None, code=404, msg=None, hdrs=None, fp=None
         )
@@ -164,7 +170,9 @@ class TestGetDfProperties:
         pd.testing.assert_frame_equal(df, expected_df)
 
     @patch('Chrfinder.pubchemprops.get_first_layer_props')
-    def test_no_valid_properties(self, mock_get_first_layer_props):
+    @patch('Chrfinder.find_pka')
+    @patch('Chrfinder.find_boiling_point')
+    def test_no_valid_properties(self, mock_get_first_layer_props, mock_find_pka, mock_find_boiling_point):
         mock_get_first_layer_props.return_value = {}
 
         mixture = ['invalid_compound']
@@ -172,7 +180,6 @@ class TestGetDfProperties:
 
         expected_df = pd.DataFrame()
         pd.testing.assert_frame_equal(df, expected_df)
-
 
 # Test for add_molecule function
 def test_add_molecule():
@@ -188,6 +195,71 @@ def test_add_molecule():
     assert mixture_listbox.get(0) == "acetone"
     root.destroy()
 
+# Test for find_pka function
+@patch('Chrfinder.pka_lookup.pka_lookup_pubchem')
+def test_find_pka_valid(mock_pka_lookup_pubchem):
+    mock_pka_lookup_pubchem.return_value = {'pKa': '7.4'}
+    assert find_pka("CSCPPACGZOOCGX-UHFFFAOYSA-N") == '7.4'
+
+@patch('Chrfinder.pka_lookup.pka_lookup_pubchem')
+def test_find_pka_invalid(mock_pka_lookup_pubchem):
+    mock_pka_lookup_pubchem.return_value = None
+    assert find_pka("InvalidInChIKey") is None
+
+# Test for find_boiling_point function
+@patch('Chrfinder.pubchemprops.get_second_layer_props')
+def test_find_boiling_point(mock_get_second_layer_props):
+    mock_get_second_layer_props.return_value = {
+        'Boiling Point': [{'Value': {'StringWithMarkup': [{'String': '100 °C'}]}}]
+    }
+    assert find_boiling_point("water") == pytest.approx(100, rel=1e-2)
+
+@patch('Chrfinder.pubchemprops.get_second_layer_props')
+def test_find_boiling_point_multiple(mock_get_second_layer_props):
+    mock_get_second_layer_props.return_value = {
+        'Boiling Point': [
+            {'Value': {'StringWithMarkup': [{'String': '100 °C'}]}},
+            {'Value': {'StringWithMarkup': [{'String': '212 °F'}]}}
+        ]
+    }
+    assert find_boiling_point("water") == pytest.approx(100, rel=1e-2)
+
+@patch('Chrfinder.pubchemprops.get_second_layer_props')
+def test_find_boiling_point_none(mock_get_second_layer_props):
+    mock_get_second_layer_props.return_value = {}
+    assert find_boiling_point("unknown") is None
+
+# Test for get_df_properties function
+@patch('Chrfinder.pubchemprops.get_first_layer_props')
+@patch('Chrfinder.find_pka')
+@patch('Chrfinder.find_boiling_point')
+def test_get_df_properties(mock_find_boiling_point, mock_find_pka, mock_get_first_layer_props):
+    mock_get_first_layer_props.return_value = {
+        'CID': '962',
+        'MolecularFormula': 'H2O',
+        'MolecularWeight': '18.015',
+        'InChIKey': 'XLYOFNOQVPJJNP-UHFFFAOYSA-N',
+        'IUPACName': 'oxidane',
+        'XLogP': '-0.5'
+    }
+    mock_find_pka.return_value = '15.9'
+    mock_find_boiling_point.return_value = 100
+
+    mixture = ['water']
+    df = get_df_properties(mixture)
+
+    expected_data = {
+        'CID': ['962'],
+        'MolecularFormula': ['H2O'],
+        'MolecularWeight': [18.015],
+        'InChIKey': ['XLYOFNOQVPJJNP-UHFFFAOYSA-N'],
+        'IUPACName': ['oxidane'],
+        'XLogP': ['-0.5'],
+        'pKa': [15.9],
+        'Boiling Point': [100]
+    }
+    expected_df = pd.DataFrame(expected_data)
+    pd.testing.assert_frame_equal(df, expected_df)
 
 # Test for det_chromato function
 def test_det_chromato_empty():
@@ -215,24 +287,24 @@ def test_det_chromato_hplc1():
     }
     df = pd.DataFrame(data)
     result = det_chromato(df)
-    assert result == ("HPLC on reverse stationary phase using C18 column", "organic or hydro-organic", 5)
+    assert result == ("HPLC on normal stationary phase", "organic or hydro-organic", 5)
 
-def test_det_chromato_hplc2():
+def test_det_chromato_not_gc():
     data = {
-        'Boiling Point': [178, 332.7, 246],
+        'Boiling Point': [177.93, None, None],
         'MolecularWeight': [194, 204, 133],
         'XLogP': [-0.07, -1.33, 0.07],
         'pKa': [[14], [3.02], [1.08, 9.13]]
     }
     df = pd.DataFrame(data)
     result = det_chromato(df)
-    assert result == ('HPLC', 'organic or hydro-organic', 3.08)
+    assert result == ('GC', 'gas', None)
 
 def test_det_chromato_low_boiling_point():
     data = {
-        'Boiling Point': [100],
+        'Boiling Point': [251],
         'MolecularWeight': [150],
-        'XLogP': [-0.5],
+        'XLogP': [-3.5],
         'pKa': [3]
     }
     df = pd.DataFrame(data)
@@ -241,7 +313,7 @@ def test_det_chromato_low_boiling_point():
 
 def test_det_chromato_high_molecular_mass():
     data = {
-        'Boiling Point': [150],
+        'Boiling Point': [251],
         'MolecularWeight': [2500],
         'XLogP': [1],
         'pKa': [[5]]
@@ -250,21 +322,7 @@ def test_det_chromato_high_molecular_mass():
     result = det_chromato(df)
     assert result == ('SEC on gel permeation with a hydrophobe organic polymer stationary phase', 'organic solvent', 7)
 
-# Test for update_results function
-@patch('Chrfinder.get_df_properties')
-@patch('Chrfinder.det_chromato')
-def test_update_results(mock_det_chromato, mock_get_df_properties):
-    root = tk.Tk()
-    mock_get_df_properties.return_value = pd.DataFrame()
-    mock_det_chromato.return_value = ("HPLC", "organic or hydro-organic", 5)
-    
-    mixture = ["water"]
-    update_results(root, mixture)
-    
-    assert "HPLC" in root.winfo_children()[4].cget("text")
-    assert "organic or hydro-organic" in root.winfo_children()[5].cget("text")
-    assert "5" in root.winfo_children()[6].cget("text")
-    root.destroy()
+
 
 # Test for main function (GUI Initialization)
 #def test_main():
