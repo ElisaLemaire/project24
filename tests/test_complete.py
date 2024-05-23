@@ -6,9 +6,9 @@ import pandas as pd
 import urllib.error
 import urllib.parse
 import re
-import sys, os
-sys.path.append(os.path.realpath('src'))
-from Chrfinder import add_molecule, find_pka, find_boiling_point, get_df_properties, det_chromato, update_results, main
+#import sys, os
+#sys.path.append(os.path.realpath('src'))
+from Chrfinder.Chrfinder import add_molecule, find_pka, find_boiling_point, get_df_properties, det_chromato, update_results, main
 
 # Test for add_molecule function
 def test_add_molecule():

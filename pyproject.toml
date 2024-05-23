@@ -12,6 +12,7 @@ dependencies = [
     "pandas",
     "pubchempy",
     "tk",
+    "urllib3",
 ]
 authors = [
     {name = "Anthony Verhoeven", email = "anthony.verhoeven@epfl.ch"}

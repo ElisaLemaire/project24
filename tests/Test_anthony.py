@@ -1,12 +1,12 @@
-import sys, os
-sys.path.append(os.path.realpath('src'))
+#import sys, os
+#sys.path.append(os.path.realpath('src'))
 
 import pytest
 from unittest.mock import patch
 from Chrfinder import find_boiling_point, find_pka
 import pandas as pd
-from pubchemprops import get_cid_by_name, get_first_layer_props, get_second_layer_props
-from pka_lookup import pka_lookup_pubchem
+from Chrfinder.pubchemprops import get_cid_by_name, get_first_layer_props, get_second_layer_props
+from Chrfinder.pka_lookup import pka_lookup_pubchem
 
 
 class Test_find_pka:
