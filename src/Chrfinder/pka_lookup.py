@@ -23,7 +23,7 @@ import pandas as pd
 import pubchempy as pcp  # https://pubchempy.readthedocs.io/en/latest/guide/gettingstarted.html
 import requests
 
-from classify import classify
+from .classify import classify
 
 
 debug = False
