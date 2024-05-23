@@ -34,6 +34,7 @@ dynamic = ["version"]
 source = "https://github.com/Averhv/Chrfinder"
 tracker = "https://github.com/Averhv/Chrfinder/issues"
 
+
 [project.optional-dependencies]
 test = [
     "hypothesis",
@@ -50,7 +51,7 @@ doc = [
 ]
 
 [tool.hatch.version]
-path = "src/__init__.py"
+path = "src/Chrfinder/__init__.py"
 
 [tool.pytest.ini_options]
 testpaths = [
