@@ -5,7 +5,7 @@ import pandas as pd
 from Chrfinder.pubchemprops import get_cid_by_name, get_first_layer_props, get_second_layer_props
 import urllib.error
 import urllib.parse
-from pka_lookup import pka_lookup_pubchem
+from Chrfinder.pka_lookup import pka_lookup_pubchem
 import re
 import json
 
@@ -29,19 +29,24 @@ def add_entry_widget(root):
     label.grid(row=3, column=0, padx=5, pady=5)
     
 #Finds the pKa using the code of Khoi Van.
-def find_pka(inchikey_string):
+def find_pka(inchikey_string, verbose=False):
     text_pka = pka_lookup_pubchem(inchikey_string, "inchikey")
+    if verbose:
+        print(text_pka)
     if text_pka is not None and 'pKa' in text_pka:
             pKa_value = text_pka['pKa']
             return pKa_value
     else:
         return None
 
-def find_boiling_point(name):
+def find_boiling_point(name, verbose= False):
     text_dict = get_second_layer_props(str(name), ['Boiling Point', 'Vapor Pressure'])
     Boiling_point_values = []
     pattern_celsius = r'([-+]?\d*\.\d+|\d+) °C'
     pattern_F = r'([-+]?\d*\.\d+|\d+) °F'
+
+    if verbose:
+        print(text_dict)
     
     if 'Boiling Point' in text_dict:
         for item in text_dict['Boiling Point']:
@@ -69,7 +74,7 @@ def find_boiling_point(name):
         Boiling_temp = None
     return Boiling_temp
 
-def get_df_properties(mixture):
+def get_df_properties(mixture, verbose = False):
     compound_list = mixture
     compound_properties = []  # Define compound_properties here
     valid_properties = []
@@ -88,6 +93,8 @@ def get_df_properties(mixture):
                         compound_info[prop] = None
                 else:
                     compound_info[prop] = first_data.get(prop)
+            if verbose:
+                print(compound_info)
             
             #adds pKa if float, else converts to float from string by extracting the float contained (wrongly written on pubchem).
             pka_value = find_pka(first_data['InChIKey'])
@@ -136,8 +143,8 @@ def det_chromato(df):
     # Filter out NaN values from the boiling points list
     boiling_temps = [temp for temp in df['Boiling Point'] if temp is not None and not pd.isna(temp)] 
     
-    # Check if there are valid boiling points and if the maximum is <= 300
-    if boiling_temps and pd.Series(boiling_temps).max() <= 300:
+    # Check if there are valid boiling points and if the maximum is <= 250°C
+    if boiling_temps and pd.Series(boiling_temps).max() <= 250:
         Chromato_type = 'GC'
         eluent_nature = 'gas'
         proposed_pH = None
