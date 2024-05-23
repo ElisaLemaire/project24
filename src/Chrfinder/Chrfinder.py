@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 import pandas as pd
-from pubchemprops import get_cid_by_name, get_first_layer_props, get_second_layer_props
+from Chrfinder.pubchemprops import get_cid_by_name, get_first_layer_props, get_second_layer_props
 import urllib.error
 import urllib.parse
 from pka_lookup import pka_lookup_pubchem
