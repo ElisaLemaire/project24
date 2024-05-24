@@ -1,6 +1,4 @@
-#"""The package find the best chromatography based on properties of the mixture."""
-
-#from __future__ import annotations
+"""The package finds the best chromatography based on properties of the mixture."""
 
 __version__ = "0.0.1"
 
