@@ -1,37 +1,28 @@
 <p align="center">
-  <img src="Chrfinder/assets/Image_Chrfinder.webp" alt="Project Logo" width="650"/>
+  <img src="assets/Image_Chrfinder.webp" alt="Project Logo" width="650"/>
 </p>
 
 # Chrfinder
 
-## Project overview
+## <ins>Project overview</ins>
 
-Welcome to **Chrfinder**! This project automates the selection of the most suitable chromatography technique for separating and analyzing a given mixture of organic compounds. By simply providing the names of the molecules in the mixture, the code retrieves their physicochemical properties from PubChem web source and determines the optimal chromatography method based on these properties.
+[![PyPI version](http://img.shields.io/pypi/v/PubChemPy.svg?style=flat)](https://pypi.python.org/pypi/Chrfinder)
 
-## ✅ Benefits
+[![License](http://img.shields.io/pypi/l/PubChemPy.svg?style=flat)](https://github.com/Averhv/Chrfinder/blob/master/LICENSE)
+
+
+
+
+Welcome to **Chrfinder**! This project **automates the selection of the most suitable chromatography** technique . By simply providing the **names** of the molecules in the mixture, the code retrieves their physicochemical properties from **PubChem** (web source) and determines the optimal chromatography method based on these properties. It also gives the optimal conditions.
+
+## ✅ <ins>Benefits</ins>
 
 - **🚀 Efficiency**: Automates the property retrieval and decision-making process, saving time and reducing manual effort.
 - **🎯 Accuracy**: Utilizes precise physicochemical data to ensure the most suitable chromatography technique is chosen.
-- **🌐 Versatility**: Supports a wide range of organic compounds and chromatography methods.
-
-## 🫱🏽‍🫲🏼 Contributing
-Contributions are welcome! Please submit a pull request or open an issue to discuss any changes.
+- **🌐 Versatility**: Supports a wide range of organic compounds and chromatography methods (PubChem database).
 
 
-## 🚀 Getting Started
-
-```python
-from mypackage import main_func
-
-# One line to rule them all
-result = main_func(data)
-```
-
-This usage example shows how to quickly leverage the package's main functionality with just one line of code (or a few lines of code).
-After importing the `main_func` (to be renamed by you), you simply pass in your `data` and get the `result` (this is just an example, your package might have other inputs and outputs). 
-Short and sweet, but the real power lies in the detailed documentation.
-
-## ⚙ Installation
+## ⚙ <ins>Installation</ins>
 
 Create a new environment, you may also give the environment a different name. 
 
@@ -41,21 +32,20 @@ conda create -n chrfinder python=3.10
 
 ```
 conda activate chrfinder
-(conda_env) $ pip install .
+pip install .
 ```
 
 If you need jupyter lab, install it 
 
 ```
-(chrfinder) $ pip install jupyterlab
+pip install jupyterlab
 ```
 
-
-## 🛠️ Development installation
+## 🛠️ <ins>Development installation</ins>
 
 Initialize Git (only for the first time). 
 
-Note: You should have create an empty repository on `https://github.com:dsantos03/Chrfinder`.
+Note: You should have create an empty repository on `https://github.com:Averhv/Chrfinder`.
 
 ```
 git init
@@ -63,7 +53,7 @@ git add *
 git add .*
 git commit -m "Initial commit" 
 git branch -M main
-git remote add origin git@github.com:dsantos03/Chrfinder.git 
+git remote add origin git@github.com:Averhv/Chrfinder.git 
 git push -u origin main
 ```
 
@@ -72,23 +62,81 @@ Then add and commit changes as usual.
 To install the package, run
 
 ```
-(chrfinder) $ pip install -e ".[test,doc]"
+pip install -e ".[test,doc]"
 ```
 
-### Run tests and coverage
+#### Run tests and get coverage
 
 ```
-(conda_env) $ pip install tox
-(conda_env) $ tox
+pip install tox
+tox
 ```
 
-## Work in progress...
+## 📒 <ins>Features</ins>
+
+```python
+from chrfinder import main
+
+# Running the whole file ask for molecules through Tkinter and returns the best chromatography
+main()
+```
+
+#### 🌐 Optional functions
+
+##### find_pka(inchikey)
+Finds the pKa value for a compound using its InChIKey.
+```python
+from chrfinder import find_pka
+
+inchikey = "XEFQLINVKFYRCS-UHFFFAOYSA-N"
+find_pka(inchikey)
+```
+
+##### find_boiling_point(name)
+Finds the boiling point for a compound by name.
+```python
+from chrfinder import find_boiling_point
+
+compound_name = "Ethanol"
+find_boiling_point(compound_name)
+```
+
+##### get_df_properties()
+Get a DataFrame of properties for a mixture of compounds.
+```python
+from chrfinder import get_df_properties
+
+mixture = ["Acetone", "Ethanol", "Methanol"]
+get_df_properties(mixture, verbose=True)
+```
+
+## <ins>How It Works</ins>
+
+1. **Input**: User provides the names of the molecules present in the mixture through a Tkinter interface.
+
+2. **Data Retrieval**: Finds the following key physicochemical properties for each molecule in Pubchem:
+     - **Boiling temperature (°C)**
+     - **logP (partition coefficient)**
+     - **pKa (acid dissociation constants)**
+     - **Molecular mass**
+
+3. **Chromatography Type Decision**: Follows logical conditions to determine best chromatography and conditions
+   - **Gas Chromatography (GC)**: if the Boiling Point is low (T<sub>eb</sub> <250°C).
+   - **Ion Chromatography (IC)**: for small molecules (M<2000g/mol) and a negative maximum LogP negative
+     - Selected if the maximum molecular mass is less than or equal to 2000, and the maximum logP is negative, with a proposed pH derived from the pKa values.
+   - **High-Performance Liquid Chromatography (HPLC)**: Chosen for different conditions. Stationary phases and eluent natures are suggested.
+   - **Size Exclusion Chromatography (SEC)**: For big molecules (M>2000g/mol). From LogP, it suggest gel permeation or gel filtration, with corresponding eluant.
+
+4. **Output**:
+   - The code outputs the advisable chromatography type, the nature of the eluent (gas, aqueous, or organic), and the proposed pH for the eluent if applicable through the Tkinter interface.
+  
+## <ins>Work in progress...</ins>
 - Build a data molecules thermostability database;
 - taking into account multiple pKa values for polyacids for exemple;
 - optimize the research: search only one time te same name;
 - find physicalchemical properties as addition functionality;
 
 
-## 🫱🏽‍🫲🏼 Contributing
+## 🫱🏽‍🫲🏼 <ins>Contributing</ins>
 Contributions are welcome! Please submit a pull request or open an issue to discuss any changes.
 

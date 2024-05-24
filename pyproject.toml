@@ -11,7 +11,8 @@ description = "The package find the best chromatography based on properties of t
 dependencies = [
     "pandas",
     "pubchempy",
-    # "rdkit",
+    "tk",
+    "urllib3",
 ]
 authors = [
     {name = "Anthony Verhoeven", email = "anthony.verhoeven@epfl.ch"}
@@ -34,6 +35,7 @@ dynamic = ["version"]
 source = "https://github.com/Averhv/Chrfinder"
 tracker = "https://github.com/Averhv/Chrfinder/issues"
 
+
 [project.optional-dependencies]
 test = [
     "hypothesis",
@@ -50,7 +52,7 @@ doc = [
 ]
 
 [tool.hatch.version]
-path = "src/__init__.py"
+path = "src/Chrfinder/__init__.py"
 
 [tool.pytest.ini_options]
 testpaths = [

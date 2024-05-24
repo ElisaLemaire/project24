@@ -2,10 +2,10 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 import pandas as pd
-from pubchemprops import get_cid_by_name, get_first_layer_props, get_second_layer_props
+from Chrfinder.pubchemprops import get_cid_by_name, get_first_layer_props, get_second_layer_props
 import urllib.error
 import urllib.parse
-from pka_lookup import pka_lookup_pubchem
+from Chrfinder.pka_lookup import pka_lookup_pubchem
 import re
 import json
 
@@ -20,28 +20,77 @@ The Boiling Point is a mean of all the values (references) found.
 mixture=[]
 
 def add_molecule(mixture_entry, mixture_listbox):
+    """
+    Add a molecule to the mixture list and update the listbox.
+
+    Args:
+        mixture_entry (tk.Entry): The entry widget for molecule input.
+        mixture_listbox (tk.Listbox): The listbox widget displaying the mixture.
+
+    Returns:
+        None
+    """
     element = mixture_entry.get()
     mixture.append(element)
     mixture_listbox.insert(tk.END, element.strip())
 
 def add_entry_widget(root):
+    """
+    Add entry widgets to the root window.
+
+    Args:
+        root (tk.Tk): The root window of the Tkinter application.
+
+    Returns:
+        None
+    """
     entry_widget.grid(row=3, column=1, padx=5, pady=5)
     label.grid(row=3, column=0, padx=5, pady=5)
     
 #Finds the pKa using the code of Khoi Van.
-def find_pka(inchikey_string):
+def find_pka(inchikey_string, verbose=False):
+    """
+    Find the pKa value for a compound using its InChIKey.
+
+    Uses the pka_lookup_pubchem() function of the pka_lookup.py file. It converts to float the value (string) of the first pka of pubchem.
+    
+    Args:
+        inchikey_string (str): The InChIKey of the compound.
+        verbose (bool, optional): If True, print the pKa value. Defaults to False.
+
+    Returns:
+        float or None: The pKa value if found, otherwise None.
+    """
     text_pka = pka_lookup_pubchem(inchikey_string, "inchikey")
+    if verbose:
+        print(text_pka)
     if text_pka is not None and 'pKa' in text_pka:
             pKa_value = text_pka['pKa']
             return pKa_value
     else:
         return None
 
-def find_boiling_point(name):
+def find_boiling_point(name, verbose= False):
+    """
+    Find the boiling point for a compound by name.
+
+    Exctracts the celsius and Farenheit boiling point separetely, using RegExr patterns.
+    Converts °F to °C and takes the mean, then returns the float.
+    
+    Args:
+        name (str): The name of the compound.
+        verbose (bool, optional): If True, print the boiling point information (used in notebooks). Defaults to False.
+
+    Returns:
+        float or None: The average boiling point in Celsius if found, otherwise None.
+    """
     text_dict = get_second_layer_props(str(name), ['Boiling Point', 'Vapor Pressure'])
     Boiling_point_values = []
     pattern_celsius = r'([-+]?\d*\.\d+|\d+) °C'
     pattern_F = r'([-+]?\d*\.\d+|\d+) °F'
+
+    if verbose:
+        print(text_dict)
     
     if 'Boiling Point' in text_dict:
         for item in text_dict['Boiling Point']:
@@ -69,7 +118,17 @@ def find_boiling_point(name):
         Boiling_temp = None
     return Boiling_temp
 
-def get_df_properties(mixture):
+def get_df_properties(mixture, verbose = False):
+    """
+    Get a DataFrame of properties for compounds in the mixture.
+
+    Args:
+        mixture (list): The list of compound names.
+        verbose (bool, optional): If True, print intermediate information (used in notebooks). Defaults to False.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing properties of the compounds.
+    """
     compound_list = mixture
     compound_properties = []  # Define compound_properties here
     valid_properties = []
@@ -88,6 +147,8 @@ def get_df_properties(mixture):
                         compound_info[prop] = None
                 else:
                     compound_info[prop] = first_data.get(prop)
+            if verbose:
+                print(compound_info)
             
             #adds pKa if float, else converts to float from string by extracting the float contained (wrongly written on pubchem).
             pka_value = find_pka(first_data['InChIKey'])
@@ -129,6 +190,17 @@ def get_df_properties(mixture):
     return(df)
 
 def det_chromato(df):
+    """
+    Determine the type of chromatography based on compound properties.
+
+    Conditions: Boiling temperature, molar mass, pka, LogP. To improve: add Thermal stability.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing compound properties.
+
+    Returns:
+        tuple: Chromatography type, eluent nature, and proposed pH.
+    """
     global Type_Label, Eluant_Label, pH_Label
     if df.empty:
         return "Unknown", "Unknown", None
@@ -136,8 +208,8 @@ def det_chromato(df):
     # Filter out NaN values from the boiling points list
     boiling_temps = [temp for temp in df['Boiling Point'] if temp is not None and not pd.isna(temp)] 
     
-    # Check if there are valid boiling points and if the maximum is <= 300
-    if boiling_temps and pd.Series(boiling_temps).max() <= 300:
+    # Check if there are valid boiling points and if the maximum is <= 250°C
+    if boiling_temps and pd.Series(boiling_temps).max() <= 250:
         Chromato_type = 'GC'
         eluent_nature = 'gas'
         proposed_pH = None
@@ -206,6 +278,16 @@ def det_chromato(df):
     return Chromato_type, eluent_nature, proposed_pH
 
 def update_results(root, mixture):
+    """
+    Update the results displayed in the Tkinter GUI with the determined chromatography type.
+
+    Args:
+        root (tk.Tk): The root window of the Tkinter application.
+        mixture (list): The list of compounds in the mixture.
+
+    Returns:
+        None
+    """
     global Type_Label, Eluant_Label, pH_Label
     if not mixture:
         messagebox.showinfo("Error", "Please add molecules to the mixture before determining chromatography.")
@@ -220,6 +302,12 @@ def update_results(root, mixture):
         pH_Label.config(text=f"Proposed pH for the eluent: {proposed_pH}")
 
 def main():
+    """
+    The main function to initialize and run the Tkinter GUI application.
+
+    Returns:
+        None
+    """
     global entry_widget, label, mixture_listbox, Type_Label, Eluant_Label, pH_Label
     root = tk.Tk()
     root.title("Determination of Chromatography Type")
