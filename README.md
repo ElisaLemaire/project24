@@ -6,12 +6,13 @@
 
 ## <ins>Project overview</ins>
 
-[![PyPI version](http://img.shields.io/pypi/v/PubChemPy.svg?style=flat)](https://pypi.python.org/pypi/Chrfinder)
+<div align="center">
+[![PyPI version](https://img.shields.io/pypi/v/Chrfinder?style=plastic&color=blue)](https://pypi.python.org/pypi/Chrfinder)
 
-[![License](http://img.shields.io/pypi/l/PubChemPy.svg?style=flat)](https://github.com/Averhv/Chrfinder/blob/master/LICENSE)
+[![License](https://img.shields.io/github/license/Averhv/Chrfinder?style=plastic&color=Orange)](https://github.com/Averhv/Chrfinder/blob/master/LICENSE)
 
-
-
+<img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/Chrfinder?style=plastic" />
+</div>
 
 Welcome to **Chrfinder**! This project **automates the selection of the most suitable chromatography** technique . By simply providing the **names** of the molecules in the mixture, the code retrieves their physicochemical properties from **PubChem** (web source) and determines the optimal chromatography method based on these properties. It also gives the optimal conditions.
 
@@ -26,48 +27,37 @@ Welcome to **Chrfinder**! This project **automates the selection of the most sui
 
 Create a new environment, you may also give the environment a different name. 
 
-```
+```bash
 conda create -n chrfinder python=3.10 
 ```
 
-```
+```bash
 conda activate chrfinder
+pip install Chrfinder
+```
+
+## 🛠️ <ins>Installation for Development</ins>
+
+To get started with Chrfinder, you can follow these steps:
+```bash
+git clone https://github.com/Averhv/Chrfinder.git
+cd Chrfinder
 pip install .
-```
-
-If you need jupyter lab, install it 
-
-```
 pip install jupyterlab
+jupyter lab
 ```
-
-## 🛠️ <ins>Development installation</ins>
-
-Initialize Git (only for the first time). 
-
-Note: You should have create an empty repository on `https://github.com:Averhv/Chrfinder`.
-
-```
-git init
-git add * 
-git add .*
-git commit -m "Initial commit" 
-git branch -M main
-git remote add origin git@github.com:Averhv/Chrfinder.git 
-git push -u origin main
-```
-
-Then add and commit changes as usual. 
-
-To install the package, run
-
-```
+#### Optional: Installing for Development and Testing
+If you want to contribute to Chrfinder or run the tests and get coverage, you can install the package in editable mode along with the necessary dependencies for testing and documentation:
+```bash
+git clone https://github.com/Averhv/Chrfinder.git
+cd Chrfinder
 pip install -e ".[test,doc]"
+pip install jupyterlab
+jupyter lab
 ```
 
-#### Run tests and get coverage
-
-```
+Then you need to run the tests as follow in your terminal:
+```bash
 pip install tox
 tox
 ```

@@ -8,7 +8,7 @@ import urllib.parse
 import re
 from Chrfinder.Chrfinder import add_molecule, find_pka, find_boiling_point, get_df_properties, det_chromato, update_results, main
 
-class TestFindPka:
+class test_find_pka:
     @patch('Chrfinder.pka_lookup.pka_lookup_pubchem')
     def test_find_pka_valid_input(self, mock_pka_lookup):
         inchikey_string = 'CSCPPACGZOOCGX-UHFFFAOYSA-N'
