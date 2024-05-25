@@ -1,6 +1,6 @@
 """The package finds the best chromatography based on properties of the mixture."""
 
-__version__ = "0.0.1"
+__version__ = "0.0.3"
 
 from .pubchemprops import get_cid_by_name, get_first_layer_props, get_second_layer_props
 from .pka_lookup import pka_lookup_pubchem
