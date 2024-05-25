@@ -11,6 +11,7 @@ license = {file = "LICENSE"}
 description = "The package find the best chromatography based on properties of the mixture"
 dependencies = [
     "pandas",
+    "numpy"
     "pubchempy",
     "tk",
     "urllib3",
