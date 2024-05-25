@@ -4,6 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "Chrfinder"
+version = "0.0.2"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {file = "LICENSE"}
@@ -29,7 +30,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
 ]
-dynamic = ["version"]
+
 
 [project.urls]
 source = "https://github.com/Averhv/Chrfinder"
