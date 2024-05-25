@@ -30,6 +30,26 @@ debug = False
 
 
 def pka_lookup_pubchem(identifier, namespace=None, domain='compound') -> Optional[str]:
+     """
+    Lookup the pKa value of a compound from PubChem.
+
+    This function uses the PubChem API to find the pKa value of a compound based on a given identifier. 
+    The identifier can be a name, CAS number, SMILES, InChI, or InChIKey. The function also supports debugging mode.
+
+    Args:
+        identifier (str): The identifier for the compound. This can be a chemical name, CAS number, SMILES, InChI, or InChIKey.
+        namespace (str, optional): The namespace of the identifier. This can be 'name', 'cas', 'smiles', 'inchi', or 'inchikey'. 
+                                   If not provided, the function will attempt to classify the identifier.
+        domain (str, optional): The domain to search within. Default is 'compound'.
+
+    Returns:
+        Optional[str]: A dictionary with the pKa value and other relevant information if found, otherwise None.
+
+    Raises:
+        ValueError: If an exact match for the identifier is not found on PubChem.
+        RuntimeError: If the compound or pKa value is not found in PubChem.
+    
+    """
     global debug
 
     if len(sys.argv) == 2 and sys.argv[1] in ['--debug=True', '--debug=true', '--debug', '-d']:

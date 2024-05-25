@@ -25,11 +25,11 @@ Welcome to **Chrfinder**! This project **automates the selection of the most sui
 Create a new environment, you may also give the environment a different name. 
 
 ```bash
-conda create -n chrfinder python=3.10 
+conda create -n Chrfinder python=3.10 
 ```
 
 ```bash
-conda activate chrfinder
+conda activate Chrfinder
 pip install Chrfinder
 ```
 
@@ -70,7 +70,7 @@ Test result: 15 passed in ~20s
 ## 📒 <ins>Features</ins>
 
 ```python
-from chrfinder import main
+from Chrfinder import main
 
 # Running the whole file ask for molecules through Tkinter and returns the best chromatography
 main()
@@ -81,7 +81,7 @@ main()
 ##### find_pka(inchikey)
 Finds the pKa value for a compound using its InChIKey.
 ```python
-from chrfinder import find_pka
+from Chrfinder import find_pka
 
 inchikey = "XEFQLINVKFYRCS-UHFFFAOYSA-N"
 find_pka(inchikey)
@@ -90,7 +90,7 @@ find_pka(inchikey)
 ##### find_boiling_point(name)
 Finds the boiling point for a compound by name.
 ```python
-from chrfinder import find_boiling_point
+from Chrfinder import find_boiling_point
 
 compound_name = "Ethanol"
 find_boiling_point(compound_name)
@@ -99,7 +99,7 @@ find_boiling_point(compound_name)
 ##### get_df_properties()
 Get a DataFrame of properties for a mixture of compounds.
 ```python
-from chrfinder import get_df_properties
+from Chrfinder import get_df_properties
 
 mixture = ["Acetone", "Ethanol", "Methanol"]
 get_df_properties(mixture, verbose=True)
@@ -126,10 +126,10 @@ get_df_properties(mixture, verbose=True)
    - The code outputs the advisable chromatography type, the nature of the eluent (gas, aqueous, or organic), and the proposed pH for the eluent if applicable through the Tkinter interface.
   
 ## <ins>Work in progress...</ins>
-- Build a data molecules thermostability database;
-- taking into account multiple pKa values for polyacids for exemple;
-- optimize the research: search only one time te same name;
-- find physicalchemical properties as addition functionality;
+- **Efficiency: build a database**;
+- **Research thermostability** in lab to improve precision
+- Taking into account **multiple pKa values** for polyacids for exemple;
+- **Optimize the research**: search only one time the same name;
 
 
 ## 🫱🏽‍🫲🏼 <ins>Contributing</ins>
