@@ -58,7 +58,15 @@ Then you need to run the tests as follow in your terminal:
 pip install tox
 tox
 ```
-
+One can also run the following to get better **readability**:
+- runs tests for the Chrfinder.py file
+- measures code coverage
+- generates coverage reports in both XML and terminal formats
+- provides verbose output during test execution.
+```bash
+pytest --cov=src/Chrfinder.py --cov-report xml:.tox/coverage.xml --cov-report term -vv
+```
+Test result: 15 passed in ~20s
 ## 📒 <ins>Features</ins>
 
 ```python

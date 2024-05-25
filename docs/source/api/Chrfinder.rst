@@ -20,14 +20,6 @@ Chrfinder.classify module
    :undoc-members:
    :show-inheritance:
 
-Chrfinder.example\_module module
---------------------------------
-
-.. automodule:: Chrfinder.example_module
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Chrfinder.pka\_lookup module
 ----------------------------
 
