@@ -9,7 +9,7 @@ from Pubchem and return it if found; return None, otherwise
 
 Change notes:
 - 2020-02-14:
-  - Instead of just returning the result, return the result combo as json dict
+- Instead of just returning the result, return the result combo as json dict
 
 """
 

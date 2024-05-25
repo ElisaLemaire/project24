@@ -13,9 +13,13 @@ import urllib.request, json
 
 def pubchem_parsing(url):
     """
-        Get the link to PubChem API, parse it for JSON and then translate that
-        to Python dictionary;
-        This is just to follow the DRY principle
+    Parses the response from a given URL to PubChem API and returns the result as a Python dictionary.
+
+    Args:
+        url (str): The URL to query the PubChem API.
+
+    Returns:
+        dict: A Python dictionary containing the parsed JSON response from the PubChem API.
     """
     req = urllib.request.Request(url)
     res = urllib.request.urlopen(req).read()
@@ -25,14 +29,22 @@ def pubchem_parsing(url):
 
 def get_cid_by_name(compound_name):
     """
-        1. Accepts the compound name
-        2. Searches PubChem by this name
-        3. Returns the compound's PubChem CID
-    """
+    Fetches the PubChem Compound Identifier (CID) for a given compound name.
 
+    Args:
+        compound_name (str): The name of the compound to search for in PubChem.
+
+    Returns:
+        int: The PubChem CID corresponding to the provided compound name.
+
+    Raises:
+        KeyError: If the PubChem API response does not contain the expected structure.
+        Exception: If there is an error while communicating with PubChem or parsing the response.
+    """
+    encoded_name = urllib.parse.quote(compound_name)
+    
     # Construct the link to PubChem's PUG REST API
-    pubchem_record_link = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/"
-    pubchem_record_link += "name/%s/record/JSON" % compound_name
+    pubchem_record_link = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{encoded_name}/record/JSON"
 
     # Parse the JSON received from PubChem to Python Dictionary
     general_info = pubchem_parsing(pubchem_record_link)
@@ -45,13 +57,14 @@ def get_cid_by_name(compound_name):
 
 def get_first_layer_props(compound_name, first_layer_props):
     """
-        1. Accepts the compound name as a String and the required first layer
-           props as a List
-        2. Finds its CID
-        3. Creates a link to PubChem PUG REST API to get the required properties
-        4. Returns a dictionary with the required props
-        NOTE: <First layer props> means that these properties can be directly
-              accessed via the convenient PubChem PUG REST API
+    Retrieves the properties directly accessible via the PubChem PUG REST API for a given compound.
+
+    Args:
+        compound_name (str): The name of the compound to retrieve properties for.
+        first_layer_props (list of str): A list of strings representing the required first layer properties.
+
+    Returns:
+        dict: A dictionary containing the requested first layer properties for the compound.
     """
     compound_cid = get_cid_by_name(compound_name)
 
@@ -69,14 +82,18 @@ def get_first_layer_props(compound_name, first_layer_props):
 
 def get_second_layer_props(compound_name, required_properties):
     """
-        1. Accepts the compound name
-        2. Gets the CID for this compound
-        3. Searches PubChem for data for the specified CID
-        4. Cycles through the fetched data to select required fields
-        5. Returns a dictionary with specified properties of specified compound
+    Fetches the compound's CID, searches PubChem for data for the specified CID, cycles through the fetched data to select the required fields, and returns a dictionary with the specified properties for a given compound.
 
-        NOTE: <Second layer properties> means that these properties can not be
-              accessed directly via the PubChem PUG REST API.
+    Args:
+        compound_name (str): The name of the compound to retrieve properties for.
+        required_properties (list of str): A list of strings representing the required properties.
+
+    Returns:
+        dict: A dictionary containing the specified properties of the given compound.
+
+    Raises:
+        KeyError: If the PubChem API response does not contain the expected structure.
+        Exception: If there is an error while communicating with PubChem or parsing the response.
     """
     # Get the compound's PubChem CID
     compound_cid = get_cid_by_name(compound_name)

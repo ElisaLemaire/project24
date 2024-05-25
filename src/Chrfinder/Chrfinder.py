@@ -34,6 +34,7 @@ def add_molecule(mixture_entry, mixture_listbox):
     mixture.append(element)
     mixture_listbox.insert(tk.END, element.strip())
 
+
 def add_entry_widget(root):
     """
     Add entry widgets to the root window.
@@ -186,7 +187,8 @@ def get_df_properties(mixture, verbose = False):
     # Set the property names from the first dictionary as column headers
     if len(valid_properties) > 0:
         df = df.reindex(columns=valid_properties[0].keys())
-    print(df)
+    if verbose:
+        print(df)
     return(df)
 
 def det_chromato(df):
