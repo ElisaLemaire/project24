@@ -1,12 +1,12 @@
 import re
 
 def classify(identifier: str) -> str:
-    """Determine the type of chemical indentifier (CAS, smiles, inchi, inchikey)
+    """Determine the type of chemical identifier (CAS, smiles, inchi, inchikey)
     
     Parameters
     ----------
-    indentifier : str
-        a string of chemical indentifier
+    identifier : str
+        a string of chemical identifier
     
     Returns
     -------
@@ -15,7 +15,7 @@ def classify(identifier: str) -> str:
     """
 
     # https://www.ebi.ac.uk/miriam/main/collections/MIR:00000237
-    cas_pattern = re.compile(r'^\d{1,7}\-\d{2}\-\d$')
+    cas_pattern = re.compile(r'^\d{1,7}-\d{2}-\d$')
 
     '''
     The first is reference from: https://gist.github.com/lsauer/1312860/264ae813c2bd2c27a769d261c8c6b38da34e22fb#file-smiles_inchi_annotated-js
@@ -28,13 +28,13 @@ def classify(identifier: str) -> str:
         1234567,
         'qwertyui'
     '''
-    smiles_pattern = re.compile(r'^(?!InChI=)(?!\d{1,7}\-\d{2}\-\d)(?![A-Z]{14}\-[A-Z]{10}(\-[A-Z])?)[^J][a-zA-Z0-9@+\-\[\]\(\)\\\/%=#$]{1,}$')
+    smiles_pattern = re.compile(r'^(?!InChI=)(?!\d{1,7}-\d{2}-\d)(?![A-Z]{14}-[A-Z]{10}(-[A-Z])?)[^J][a-zA-Z0-9@+\-\[\]\(\)\\\/%=#$]{1,}$')
 
     # https://www.ebi.ac.uk/miriam/main/collections/MIR:00000383
-    inchi_pattern = re.compile(r'^InChI\=1S?\/[A-Za-z0-9\.]+(\+[0-9]+)?(\/[cnpqbtmsih][A-Za-z0-9\-\+\(\)\,\/\?\;\.]+)*$')
+    inchi_pattern = re.compile(r'^InChI=1S?/[A-Za-z0-9\.]+(\+[0-9]+)?(/[cnpqbtmsih][A-Za-z0-9\-+\(\),\/\?;\.]+)*$')
 
     # https://www.ebi.ac.uk/miriam/main/collections/MIR:00000387
-    inchikey_pattern = re.compile(r'^[A-Z]{14}\-[A-Z]{10}(\-[A-Z])?')
+    inchikey_pattern = re.compile(r'^[A-Z]{14}-[A-Z]{10}(-[A-Z])?')
 
     # IMPORTANT: careful with the order of the dict since one regex might match more than 1 type
     # See smiles_pattern above
@@ -48,7 +48,6 @@ def classify(identifier: str) -> str:
     for key, value in lookup.items():
         if value(identifier):
             return key
-
 
 if __name__ == "__main__":
     print(classify('106-54-7'))

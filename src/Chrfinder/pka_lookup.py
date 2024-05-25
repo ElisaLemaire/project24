@@ -30,15 +30,15 @@ debug = False
 
 
 def pka_lookup_pubchem(identifier, namespace=None, domain='compound') -> Optional[str]:
-     """
+    """
     Lookup the pKa value of a compound from PubChem.
 
-    This function uses the PubChem API to find the pKa value of a compound based on a given identifier. 
+    This function uses the PubChem API to find the pKa value of a compound based on a given identifier.
     The identifier can be a name, CAS number, SMILES, InChI, or InChIKey. The function also supports debugging mode.
 
     Args:
         identifier (str): The identifier for the compound. This can be a chemical name, CAS number, SMILES, InChI, or InChIKey.
-        namespace (str, optional): The namespace of the identifier. This can be 'name', 'cas', 'smiles', 'inchi', or 'inchikey'. 
+        namespace (str, optional): The namespace of the identifier. This can be 'name', 'cas', 'smiles', 'inchi', or 'inchikey'.
                                    If not provided, the function will attempt to classify the identifier.
         domain (str, optional): The domain to search within. Default is 'compound'.
 
@@ -48,15 +48,11 @@ def pka_lookup_pubchem(identifier, namespace=None, domain='compound') -> Optiona
     Raises:
         ValueError: If an exact match for the identifier is not found on PubChem.
         RuntimeError: If the compound or pKa value is not found in PubChem.
-    
     """
     global debug
 
     if len(sys.argv) == 2 and sys.argv[1] in ['--debug=True', '--debug=true', '--debug', '-d']:
         debug = True
-
-    # if debug:
-    #     print(f'In DEBUG mode: {debug}')
 
     # Identify lookup source (Pubchem in this case)
     lookup_source = 'Pubchem'
@@ -65,18 +61,12 @@ def pka_lookup_pubchem(identifier, namespace=None, domain='compound') -> Optiona
         headers = {
             'user-agent': 'Mozilla/5.0 (X11; CentOS; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.75 Safari/537.36'}
 
-        # print('Searching Pubchem...')
-
-        # Using pubchem api for python
-        # Getting CID number, the result of this, by default is exact match. The result is returned as a list.
         cids = []
         identifier_type = ''
 
         if not namespace:
             identifier_type = classify(identifier)
-            # print(f'identifier_type determined by classify() is: {identifier_type}')
 
-            # If the input is inchi, inchikey or smiles (this could be a false smiles):
             if identifier_type in ['smiles', 'inchi', 'inchikey']:
                 lookup = pcp.get_cids(identifier, namespace=identifier_type)
                 if lookup:
@@ -85,7 +75,6 @@ def pka_lookup_pubchem(identifier, namespace=None, domain='compound') -> Optiona
                 lookup = pcp.get_cids(identifier, namespace='name')
                 if lookup:
                     cids.append(lookup[0])
-                    # print(f'namespace from pubchem lookup is: {namespace}')
         elif namespace == 'cas':
             cids = pcp.get_cids(identifier, namespace='name')
         else:
@@ -95,24 +84,13 @@ def pka_lookup_pubchem(identifier, namespace=None, domain='compound') -> Optiona
             lookup = pcp.get_cids(identifier, namespace='name')
             if lookup:
                 cids.append(lookup[0])
-
-            # cids = pcp.get_cids(identifier, namespace=namespace)
             identifier_type = namespace
 
-        # print(cids)
-
-        #  this api return an empty list if it cannot find cas_nr. This is to check if pubchem has this chemical.
         if len(cids) > 0:
-            # if Pubchem found the result, get the first result of the list
             cid = cids[0]
-            # print('Compound ID (CID) from PubChem is: {} and type is: {}'.format(cid, type(cid)))
-
             exact_match = True
-
-            # synonyms = []
             synonyms = pcp.get_synonyms(cid)[0]['Synonym'] or []
-            
-            # Extract CAS number from the list of synonyms
+
             returned_cas = ''
             for synonym in synonyms:
                 cas_nr = re.search(r'^\d{2,7}-\d{2}-\d$', synonym)
@@ -121,25 +99,16 @@ def pka_lookup_pubchem(identifier, namespace=None, domain='compound') -> Optiona
                     returned_cas = cas_nr
                     break
 
-            # lookup_result = []
             lookup_result = pcp.get_properties(['inchi', 'inchikey',
-                                        'canonical_smiles', 'isomeric_smiles',
-                                        'iupac_name'],
-                                cid)
+                                                'canonical_smiles', 'isomeric_smiles',
+                                                'iupac_name'],
+                                               cid)
 
             if identifier_type == 'cas':
-                # To double check if the CAS number is correct:
-                # using pubchem api, get a list of synonym. The result is a list of dict.
-                # choose the first result and check all values for 'Synonym' key:
                 exact_match = identifier in synonyms
-
             elif identifier_type in ['inchi', 'inchikey']:
-
                 if identifier_type == 'inchi':
-                    # print(lookup_result[0].get('InChI', False))
-                    # print(f'input:\n{identifier}')
                     exact_match = (identifier == lookup_result[0].get('InChI', False))
-                
                 elif identifier_type == 'inchikey':
                     exact_match = (identifier == lookup_result[0].get('InChIKey', False))
 
@@ -148,32 +117,15 @@ def pka_lookup_pubchem(identifier, namespace=None, domain='compound') -> Optiona
                     print(f'Exact match between input and Pubchem return value? {identifier in synonyms}')
                 raise ValueError('This is not an exact match on Pubchem!')
 
-            '''
-            get url from Pubchem to get pka lookup result
-            'XML' can be replaced with 'JSON' but it is harder to parse later on
-            for more info about Pubchem output types: https://pubchemdocs.ncbi.nlm.nih.gov/pug-rest$_Toc494865558
-            '''
             pka_lookup_result_xml = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/{}/XML?heading=Dissociation+Constants'.format(cid)
 
-            # Get the html request info using CID number from pubchem
             r = requests.get(pka_lookup_result_xml, headers=headers, timeout=15)
-            # Check to see if give OK status (200) and not redirect
             if r.status_code == 200 and len(r.history) == 0:
-                # print(r.text)
-                # Use python XML to parse the return result
                 tree = ET.fromstring(r.text)
-            
-                # Get the XML tree of <Information> only
                 info_node = tree.find('.//*{http://pubchem.ncbi.nlm.nih.gov/pug_view}Information')
-
-                # Get the pKa reference:
                 original_source = info_node.find('{http://pubchem.ncbi.nlm.nih.gov/pug_view}Reference').text
-                # Get the pKa result:
                 pka_result = info_node.find('.//*{http://pubchem.ncbi.nlm.nih.gov/pug_view}String').text
-                pka_result = re.sub(r'^pKa = ', '', pka_result)    # remove 'pka = ' part out of the string answer
-                # print(pka_result)
-                # print(original_source)
-                # print(lookup_result)
+                pka_result = re.sub(r'^pKa = ', '', pka_result)
 
                 core_result = {
                     'source': lookup_source,
@@ -183,23 +135,21 @@ def pka_lookup_pubchem(identifier, namespace=None, domain='compound') -> Optiona
                     'Substance_CASRN': returned_cas,
                 }
                 extra_info = lookup_result[0]
-                extra_info.pop('CID', None)    # Remove 'CID': ... from lookup_result[0]
+                extra_info.pop('CID', None)
 
-                # Merge 2 dict: https://treyhunner.com/2016/02/how-to-merge-dictionaries-in-python/
                 result = {**core_result, **extra_info}
-                # Rename some keys in the dict
                 s = pd.Series(result)
                 s = s.rename({
                     'CanonicalSMILES': 'Canonical_SMILES',
                     'IsomericSMILES': 'Isomeric_SMILES',
                     'IUPACName': 'IUPAC_Name'
                 })
-                result = s.to_dict()            
+                result = s.to_dict()
                 return result
 
             else:
                 raise RuntimeError('pKa not found in Pubchem.')
-    
+
         else:
             raise RuntimeError('Compound not found in Pubchem.')
 
