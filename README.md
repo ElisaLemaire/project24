@@ -11,7 +11,8 @@
 [![PyPI version](https://img.shields.io/pypi/v/Chrfinder?style=plastic&color=blue)](https://pypi.python.org/pypi/Chrfinder) 
 [![License](https://img.shields.io/github/license/Averhv/Chrfinder?style=plastic&color=Orange)](https://github.com/Averhv/Chrfinder/blob/master/LICENSE) 
 <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/Chrfinder?style=plastic" /> 
-![Coverage Badge](https://github.com/Averhv/Chrfinder/assets/coverage-badge.svg)
+[![Coverage Badge](https://github.com/Averhv/Chrfinder/blob/main/assets/coverage-badge.svg?short_path=eb9c651)](https://github.com/Averhv/Chrfinder)
+
 
 </h1>
 
