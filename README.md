@@ -27,35 +27,34 @@ Welcome to **Chrfinder**! This project **automates the selection of the most sui
 
 ## ⚙ <ins>Installation</ins>
 
+To get started with Chrfinder, you can follow these steps:
 Create a new environment, you may also give the environment a different name. 
 
 ```bash
 conda create -n Chrfinder python=3.10 
 ```
-
+Then install it through pypi (easy, recommended):
 ```bash
 conda activate Chrfinder
+```
+```bash
 pip install Chrfinder
 ```
+You also have the choice to install it without pypi:
 
-## 🛠️ <ins>Installation for Development</ins>
-
-To get started with Chrfinder, you can follow these steps:
 ```bash
 git clone https://github.com/Averhv/Chrfinder.git
 cd Chrfinder
 pip install .
-pip install jupyterlab
-jupyter lab
 ```
-#### Optional: Installing for Development and Testing
-If you want to contribute to Chrfinder or run the tests and get coverage, you can install the package in editable mode along with the necessary dependencies for testing and documentation:
+
+## 🛠️ <ins>Installation for Development</ins>
+
+If you want to contribute to Chrfinder or run the tests and get coverage, you can install the package in editable mode along with the necessary dependencies for testing and documentation. The following script allows the changes to be reflected immediately:
 ```bash
 git clone https://github.com/Averhv/Chrfinder.git
 cd Chrfinder
 pip install -e ".[test,doc]"
-pip install jupyterlab
-jupyter lab
 ```
 
 Then you need to run the tests as follow in your terminal:
@@ -63,27 +62,21 @@ Then you need to run the tests as follow in your terminal:
 pip install tox
 tox
 ```
-One can also run the following to get better **readability**:
-- runs tests for the Chrfinder.py file
-- measures code coverage
-- generates coverage reports in both XML and terminal formats
-- provides verbose output during test execution.
-```bash
-pytest --cov=src/Chrfinder.py --cov-report xml:.tox/coverage.xml --cov-report term -vv
-```
 Test result: 15 passed in ~20s
 ## 📒 <ins>Features</ins>
 
+The following should be written in the terminal in python mode:
 ```python
 from Chrfinder import main
-
-# Running the whole file ask for molecules through Tkinter and returns the best chromatography
+```
+Running the main file asks for molecules through Tkinter and returns the best chromatography.
+```python
 main()
 ```
 
 #### 🌐 Optional functions
 
-##### find_pka(inchikey)
+- find_pka(inchikey)
 Finds the pKa value for a compound using its InChIKey.
 ```python
 from Chrfinder import find_pka
@@ -92,7 +85,7 @@ inchikey = "XEFQLINVKFYRCS-UHFFFAOYSA-N"
 find_pka(inchikey)
 ```
 
-##### find_boiling_point(name)
+- find_boiling_point(name)
 Finds the boiling point for a compound by name.
 ```python
 from Chrfinder import find_boiling_point
@@ -101,7 +94,7 @@ compound_name = "Ethanol"
 find_boiling_point(compound_name)
 ```
 
-##### get_df_properties()
+- get_df_properties()
 Get a DataFrame of properties for a mixture of compounds.
 ```python
 from Chrfinder import get_df_properties
@@ -109,26 +102,6 @@ from Chrfinder import get_df_properties
 mixture = ["Acetone", "Ethanol", "Methanol"]
 get_df_properties(mixture, verbose=True)
 ```
-
-## <ins>How It Works</ins>
-
-1. **Input**: User provides the names of the molecules present in the mixture through a Tkinter interface.
-
-2. **Data Retrieval**: Finds the following key physicochemical properties for each molecule in Pubchem:
-     - **Boiling temperature (°C)**
-     - **logP (partition coefficient)**
-     - **pKa (acid dissociation constants)**
-     - **Molecular mass**
-
-3. **Chromatography Type Decision**: Follows logical conditions to determine best chromatography and conditions
-   - **Gas Chromatography (GC)**: if the Boiling Point is low (T<sub>eb</sub> <250°C).
-   - **Ion Chromatography (IC)**: for small molecules (M<2000g/mol) and a negative maximum LogP negative
-     - Selected if the maximum molecular mass is less than or equal to 2000, and the maximum logP is negative, with a proposed pH derived from the pKa values.
-   - **High-Performance Liquid Chromatography (HPLC)**: Chosen for different conditions. Stationary phases and eluent natures are suggested.
-   - **Size Exclusion Chromatography (SEC)**: For big molecules (M>2000g/mol). From LogP, it suggest gel permeation or gel filtration, with corresponding eluant.
-
-4. **Output**:
-   - The code outputs the advisable chromatography type, the nature of the eluent (gas, aqueous, or organic), and the proposed pH for the eluent if applicable through the Tkinter interface.
   
 ## <ins>Work in progress...</ins>
 - **Efficiency: build a database**;
