@@ -13,6 +13,7 @@ dependencies = [
     "pandas",
     "pubchempy",
     "tk",
+    "requests",
 ]
 authors = [
     {name = "Anthony Verhoeven", email = "anthony.verhoeven@epfl.ch"}
